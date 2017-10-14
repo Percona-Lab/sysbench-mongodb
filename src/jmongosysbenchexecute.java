@@ -174,14 +174,14 @@ public class jmongosysbenchexecute {
 	MongoClient m = new MongoClient(clientUri);
         //20171014    END
 	
-        // Credential login is optional.
-        MongoClient m;
-        if (userName.isEmpty() || userName.equalsIgnoreCase("none")) {
-            m = new MongoClient(srvrAdd);
-        } else {
-            MongoCredential credential = MongoCredential.createCredential(userName, dbName, passWord.toCharArray());
-            m = new MongoClient(srvrAdd, Arrays.asList(credential));
-        }
+        //// Credential login is optional.
+        //MongoClient m;
+        //if (userName.isEmpty() || userName.equalsIgnoreCase("none")) {
+        //    m = new MongoClient(srvrAdd);
+        //} else {
+        //    MongoCredential credential = MongoCredential.createCredential(userName, dbName, passWord.toCharArray());
+        //    m = new MongoClient(srvrAdd, Arrays.asList(credential));
+        //}
 
         logMe("mongoOptions | " + m.getMongoOptions().toString());
         logMe("mongoWriteConcern | " + m.getWriteConcern().toString());
