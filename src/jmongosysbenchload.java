@@ -17,7 +17,7 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
-
+import com.mongodb.MongoClientURI;
 public class jmongosysbenchload {
     public static AtomicLong globalInserts = new AtomicLong(0);
     public static AtomicLong globalWriterThreads = new AtomicLong(0);
@@ -105,18 +105,28 @@ public class jmongosysbenchload {
         logMe("  write concern = %s",myWriteConcern);
         logMe("  Server:Port = %s:%d",serverName,serverPort);
         logMe("  Username = %s",userName);
-
-        MongoClientOptions clientOptions = new MongoClientOptions.Builder().connectionsPerHost(2048).socketTimeout(60000).writeConcern(myWC).build();
-        ServerAddress srvrAdd = new ServerAddress(serverName,serverPort);
-
+        //20171014    BEGIN
+        // MongoClientOptions clientOptions = new MongoClientOptions.Builder().connectionsPerHost(2048).socketTimeout(60000).writeConcern(myWC).build();
+        //ServerAddress srvrAdd = new ServerAddress(serverName,serverPort);
+        // build connection uri  https://github.com/tmcallaghan/sysbench-mongodb/issues/12
+	    StringBuilder serverUri = new StringBuilder("mongodb://");
+	    if (!(userName.isEmpty() || userName.equalsIgnoreCase("none"))) {
+    	    serverUri.append(String.format("%s:%s@", userName, passWord));
+	    }
+	    serverUri.append(String.format("%s:%d/%s?authMechanism=SCRAM-SHA-1&authSource=admin", serverName, serverPort, dbName));
+	    MongoClientOptions.Builder clientOptionsBuilder = new MongoClientOptions.Builder().connectionsPerHost(2048).socketTimeout(60000).writeConcern(myWC);
+	    MongoClientURI clientUri = new MongoClientURI(serverUri.toString(), clientOptionsBuilder);
+	    MongoClient m = new MongoClient(clientUri);
+        //20171014    END
+        
         // Credential login is optional.
-        MongoClient m;
-        if (userName.isEmpty() || userName.equalsIgnoreCase("none")) {
-            m = new MongoClient(srvrAdd);
-        } else {
-            MongoCredential credential = MongoCredential.createCredential(userName, dbName, passWord.toCharArray());
-            m = new MongoClient(srvrAdd, Arrays.asList(credential));
-        }
+        //MongoClient m;
+        //if (userName.isEmpty() || userName.equalsIgnoreCase("none")) {
+        //    m = new MongoClient(srvrAdd);
+        //} else {
+        //    MongoCredential credential = MongoCredential.createCredential(userName, dbName, passWord.toCharArray());
+        //    m = new MongoClient(srvrAdd, Arrays.asList(credential));
+        //}
 
         logMe("mongoOptions | " + m.getMongoOptions().toString());
         logMe("mongoWriteConcern | " + m.getWriteConcern().toString());
